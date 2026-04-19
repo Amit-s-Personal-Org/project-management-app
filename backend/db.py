@@ -114,7 +114,7 @@ def create_user(username: str, password_hash: str) -> int:
             user_id = cursor.lastrowid
         except sqlite3.IntegrityError:
             raise ValueError(f"Username '{username}' is already taken")
-        _insert_board_with_seed(conn, user_id, "My Board")
+        _insert_board(conn, user_id, "My Board", seed=True)
         return user_id
 
 
@@ -122,7 +122,7 @@ def create_user(username: str, password_hash: str) -> int:
 # Board helpers
 # ---------------------------------------------------------------------------
 
-def _insert_board_with_seed(conn: sqlite3.Connection, user_id: int, name: str) -> int:
+def _insert_board(conn: sqlite3.Connection, user_id: int, name: str, seed: bool = False) -> int:
     cursor = conn.execute(
         "INSERT INTO boards (user_id, name, created_at) VALUES (?, ?, ?)",
         (user_id, name, datetime.now(timezone.utc).isoformat()),
@@ -134,11 +134,12 @@ def _insert_board_with_seed(conn: sqlite3.Connection, user_id: int, name: str) -
             (board_id, col["title"], col_pos),
         )
         col_id = cursor.lastrowid
-        for card_pos, card in enumerate(col["cards"]):
-            conn.execute(
-                "INSERT INTO cards (column_id, title, details, position) VALUES (?, ?, ?, ?)",
-                (col_id, card["title"], card["details"], card_pos),
-            )
+        if seed:
+            for card_pos, card in enumerate(col["cards"]):
+                conn.execute(
+                    "INSERT INTO cards (column_id, title, details, position) VALUES (?, ?, ?, ?)",
+                    (col_id, card["title"], card["details"], card_pos),
+                )
     return board_id
 
 
@@ -161,7 +162,7 @@ def create_board_for_user(username: str, name: str) -> BoardInfo:
         ).fetchone()
         if not user_row:
             raise ValueError("User not found")
-        board_id = _insert_board_with_seed(conn, user_row["id"], name)
+        board_id = _insert_board(conn, user_row["id"], name, seed=False)
         row = conn.execute(
             "SELECT id, name, created_at FROM boards WHERE id = ?", (board_id,)
         ).fetchone()

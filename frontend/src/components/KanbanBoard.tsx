@@ -21,13 +21,14 @@ import { getBoard, saveBoard, type BoardInfo } from "@/lib/api";
 type KanbanBoardProps = {
   boardId: number;
   boards: BoardInfo[];
+  username?: string;
   onBoardsChange: (boards: BoardInfo[]) => void;
   onSwitchBoard: (board: BoardInfo) => void;
   onLogout?: () => void;
   onBoardUpdate?: (board: BoardData) => void;
 };
 
-export const KanbanBoard = ({ boardId, boards, onBoardsChange, onSwitchBoard, onLogout, onBoardUpdate }: KanbanBoardProps) => {
+export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitchBoard, onLogout, onBoardUpdate }: KanbanBoardProps) => {
   const [board, setBoard] = useState<BoardData | null>(null);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -184,13 +185,20 @@ export const KanbanBoard = ({ boardId, boards, onBoardsChange, onSwitchBoard, on
                 AI Assistant
               </button>
               {onLogout && (
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="rounded-full border border-[var(--stroke)] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--gray-text)] transition hover:border-[var(--navy-dark)] hover:text-[var(--navy-dark)]"
-                >
-                  Log out
-                </button>
+                <div className="flex items-center gap-3">
+                  {username && (
+                    <span className="text-xs font-semibold text-[var(--gray-text)]">
+                      {username}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="rounded-full border border-[var(--stroke)] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--gray-text)] transition hover:border-[var(--navy-dark)] hover:text-[var(--navy-dark)]"
+                  >
+                    Log out
+                  </button>
+                </div>
               )}
             </div>
           </div>

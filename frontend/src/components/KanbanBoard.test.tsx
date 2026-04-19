@@ -28,6 +28,27 @@ const defaultProps = {
 
 const getFirstColumn = () => screen.getAllByTestId(/column-/i)[0];
 
+describe("KanbanBoard username display", () => {
+  it("shows the username when provided", async () => {
+    render(<KanbanBoard {...defaultProps} username="alice" onLogout={vi.fn()} />);
+    await waitFor(() => screen.getAllByTestId(/column-/i));
+    expect(screen.getByText("alice")).toBeInTheDocument();
+  });
+
+  it("does not show a username element when omitted", async () => {
+    render(<KanbanBoard {...defaultProps} onLogout={vi.fn()} />);
+    await waitFor(() => screen.getAllByTestId(/column-/i));
+    expect(screen.queryByText("alice")).not.toBeInTheDocument();
+  });
+
+  it("shows Log out button alongside username", async () => {
+    render(<KanbanBoard {...defaultProps} username="bob" onLogout={vi.fn()} />);
+    await waitFor(() => screen.getAllByTestId(/column-/i));
+    expect(screen.getByText("bob")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
+  });
+});
+
 describe("KanbanBoard", () => {
   it("renders five columns after loading", async () => {
     render(<KanbanBoard {...defaultProps} />);

@@ -11,6 +11,7 @@ export default function Home() {
   const router = useRouter();
   const [boards, setBoards] = useState<BoardInfo[]>([]);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
+  const [username, setUsername] = useState<string>("");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Home() {
         router.replace("/login");
         return;
       }
+      setUsername(user.username);
       const list = await getBoards();
       setBoards(list);
       if (list.length > 0) setActiveBoardId(list[0].id);
@@ -47,6 +49,7 @@ export default function Home() {
     <KanbanBoard
       boardId={activeBoardId}
       boards={boards}
+      username={username}
       onBoardsChange={setBoards}
       onSwitchBoard={(board) => setActiveBoardId(board.id)}
       onLogout={handleLogout}

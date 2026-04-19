@@ -46,12 +46,13 @@ def test_create_board(client):
     assert res.json()["name"] == "Sprint 42"
 
 
-def test_create_board_seeds_five_columns(client):
+def test_create_board_has_default_columns_no_cards(client):
     headers, _ = _signup(client)
     res = client.post("/api/boards", json={"name": "New"}, headers=headers)
     board_id = res.json()["id"]
     board = client.get(f"/api/boards/{board_id}", headers=headers).json()
-    assert len(board["columns"]) == 5
+    assert [c["title"] for c in board["columns"]] == ["Backlog", "Discovery", "In Progress", "Review", "Done"]
+    assert board["cards"] == {}
 
 
 def test_delete_board(client):
