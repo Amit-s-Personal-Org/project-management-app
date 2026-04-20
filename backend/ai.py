@@ -49,7 +49,7 @@ Respond ONLY with a valid JSON object — no markdown, no prose outside the JSON
   "board_update": null
 }}
 
-If the user asks you to change the board (move cards, add cards, rename, etc.), set board_update to the complete updated board including ALL columns and cards. Otherwise keep board_update as null. When adding new cards, assign IDs by incrementing from the highest existing card number."""
+If the user asks you to change the board (move cards, add cards, rename, etc.), set board_update to the complete updated board including ALL columns and cards. Otherwise keep board_update as null. Preserve all existing IDs exactly as given. For new cards or columns, generate a short random ID like "card-a1b2c3d4" or "col-a1b2c3d4"."""
 
     messages_to_send = [{"role": "system", "content": system_prompt}]
     messages_to_send.extend(history)

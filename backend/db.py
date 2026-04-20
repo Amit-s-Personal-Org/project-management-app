@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import uuid
 from datetime import datetime, timezone
 
 from models import BoardData, BoardInfo, Card, Column
@@ -88,6 +89,17 @@ def init_db() -> None:
             conn.execute("ALTER TABLE boards ADD COLUMN name TEXT NOT NULL DEFAULT 'My Board'")
         except sqlite3.OperationalError:
             pass  # column already exists
+        # Migrate: add ext_id columns to preserve client-generated string IDs
+        try:
+            conn.execute("ALTER TABLE columns ADD COLUMN ext_id TEXT")
+            conn.execute("UPDATE columns SET ext_id = 'col-' || id WHERE ext_id IS NULL")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            conn.execute("ALTER TABLE cards ADD COLUMN ext_id TEXT")
+            conn.execute("UPDATE cards SET ext_id = 'card-' || id WHERE ext_id IS NULL")
+        except sqlite3.OperationalError:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -129,16 +141,18 @@ def _insert_board(conn: sqlite3.Connection, user_id: int, name: str, seed: bool 
     )
     board_id = cursor.lastrowid
     for col_pos, col in enumerate(_SEED_COLUMNS):
+        col_ext_id = f"col-{uuid.uuid4().hex[:12]}"
         cursor = conn.execute(
-            "INSERT INTO columns (board_id, title, position) VALUES (?, ?, ?)",
-            (board_id, col["title"], col_pos),
+            "INSERT INTO columns (board_id, title, position, ext_id) VALUES (?, ?, ?, ?)",
+            (board_id, col["title"], col_pos, col_ext_id),
         )
         col_id = cursor.lastrowid
         if seed:
             for card_pos, card in enumerate(col["cards"]):
+                card_ext_id = f"card-{uuid.uuid4().hex[:12]}"
                 conn.execute(
-                    "INSERT INTO cards (column_id, title, details, position) VALUES (?, ?, ?, ?)",
-                    (col_id, card["title"], card["details"], card_pos),
+                    "INSERT INTO cards (column_id, title, details, position, ext_id) VALUES (?, ?, ?, ?, ?)",
+                    (col_id, card["title"], card["details"], card_pos, card_ext_id),
                 )
     return board_id
 
@@ -185,7 +199,7 @@ def delete_board(board_id: int, username: str) -> bool:
 
 def _read_board(conn: sqlite3.Connection, board_id: int) -> BoardData:
     cols = conn.execute(
-        "SELECT id, title FROM columns WHERE board_id = ? ORDER BY position",
+        "SELECT id, ext_id, title FROM columns WHERE board_id = ? ORDER BY position",
         (board_id,),
     ).fetchall()
 
@@ -193,16 +207,17 @@ def _read_board(conn: sqlite3.Connection, board_id: int) -> BoardData:
     cards: dict[str, Card] = {}
 
     for col in cols:
+        col_id_str = col["ext_id"] or f"col-{col['id']}"
         col_cards = conn.execute(
-            "SELECT id, title, details FROM cards WHERE column_id = ? ORDER BY position",
+            "SELECT id, ext_id, title, details FROM cards WHERE column_id = ? ORDER BY position",
             (col["id"],),
         ).fetchall()
         card_ids = []
         for card in col_cards:
-            cid = f"card-{card['id']}"
+            cid = card["ext_id"] or f"card-{card['id']}"
             card_ids.append(cid)
             cards[cid] = Card(id=cid, title=card["title"], details=card["details"])
-        columns.append(Column(id=f"col-{col['id']}", title=col["title"], cardIds=card_ids))
+        columns.append(Column(id=col_id_str, title=col["title"], cardIds=card_ids))
 
     return BoardData(columns=columns, cards=cards)
 
@@ -232,8 +247,8 @@ def save_board_by_id(board_id: int, username: str, board: BoardData) -> BoardDat
 
         for col_pos, col in enumerate(board.columns):
             cursor = conn.execute(
-                "INSERT INTO columns (board_id, title, position) VALUES (?, ?, ?)",
-                (board_id, col.title, col_pos),
+                "INSERT INTO columns (board_id, title, position, ext_id) VALUES (?, ?, ?, ?)",
+                (board_id, col.title, col_pos, col.id),
             )
             new_col_id = cursor.lastrowid
             for card_pos, card_id in enumerate(col.cardIds):
@@ -241,8 +256,8 @@ def save_board_by_id(board_id: int, username: str, board: BoardData) -> BoardDat
                 if card is None:
                     continue
                 conn.execute(
-                    "INSERT INTO cards (column_id, title, details, position) VALUES (?, ?, ?, ?)",
-                    (new_col_id, card.title, card.details, card_pos),
+                    "INSERT INTO cards (column_id, title, details, position, ext_id) VALUES (?, ?, ?, ?, ?)",
+                    (new_col_id, card.title, card.details, card_pos, card_id),
                 )
 
         return _read_board(conn, board_id)
