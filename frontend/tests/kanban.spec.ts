@@ -1,6 +1,20 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, request, test, type Page } from "@playwright/test";
 
-async function loginAs(page: Page, username = "user", password = "password") {
+const TEST_USER = "e2e_test_user";
+const TEST_PASS = "e2e_test_pass";
+
+// Ensure the test user exists before any test runs.
+test.beforeAll(async () => {
+  const ctx = await request.newContext({ baseURL: "http://127.0.0.1:8000" });
+  await ctx.post("/api/auth/signup", {
+    data: { username: TEST_USER, password: TEST_PASS },
+  });
+  // Ignore 409 (user already exists from a previous run) — any other error
+  // will surface when the tests try to log in.
+  await ctx.dispose();
+});
+
+async function loginAs(page: Page, username = TEST_USER, password = TEST_PASS) {
   await page.goto("/login");
   await page.getByLabel("Username").fill(username);
   await page.getByLabel("Password").fill(password);
@@ -23,7 +37,7 @@ test("login with wrong credentials shows error", async ({ page }) => {
   await page.getByLabel("Username").fill("user");
   await page.getByLabel("Password").fill("wrong");
   await page.getByRole("button", { name: /sign in/i }).click();
-  await expect(page.getByText(/invalid username or password/i)).toBeVisible();
+  await expect(page.getByText(/invalid credentials/i)).toBeVisible();
 });
 
 test("loads the kanban board after login", async ({ page }) => {
