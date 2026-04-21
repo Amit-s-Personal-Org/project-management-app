@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { login, signup } from "@/lib/auth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,11 +36,14 @@ export default function LoginPage() {
   const isLogin = mode === "login";
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-[100dvh] items-center justify-center px-4 py-8">
+      <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+        <ThemeToggle />
+      </div>
       <div className="pointer-events-none fixed left-0 top-0 h-[420px] w-[420px] -translate-x-1/3 -translate-y-1/3 rounded-full bg-[radial-gradient(circle,_rgba(32,157,215,0.25)_0%,_rgba(32,157,215,0.05)_55%,_transparent_70%)]" />
       <div className="pointer-events-none fixed bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full bg-[radial-gradient(circle,_rgba(117,57,145,0.18)_0%,_rgba(117,57,145,0.05)_55%,_transparent_75%)]" />
 
-      <div className="relative w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white/80 p-8 shadow-[var(--shadow)] backdrop-blur">
+      <div className="relative w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-[var(--surface-header)] p-8 shadow-[var(--shadow)] backdrop-blur">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
           Multi-Board Kanban
         </p>
@@ -64,7 +68,7 @@ export default function LoginPage() {
               type="text"
               required
               autoComplete="username"
-              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface-strong)] px-3 py-2.5 text-base sm:text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
             />
           </div>
 
@@ -81,7 +85,7 @@ export default function LoginPage() {
               type="password"
               required
               autoComplete={isLogin ? "current-password" : "new-password"}
-              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface-strong)] px-3 py-2.5 text-base sm:text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
             />
           </div>
 

@@ -26,7 +26,7 @@ export const KanbanColumn = ({
     <section
       ref={setNodeRef}
       className={clsx(
-        "flex min-h-[480px] flex-col rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] p-3 transition",
+        "flex min-h-[360px] sm:min-h-[480px] flex-col rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] p-3 transition",
         isOver && "ring-2 ring-[var(--accent-yellow)] ring-offset-1"
       )}
       data-testid={`column-${column.id}`}
@@ -36,7 +36,7 @@ export const KanbanColumn = ({
         <input
           value={column.title}
           onChange={(event) => onRename(column.id, event.target.value)}
-          className="flex-1 min-w-0 bg-transparent font-display text-sm font-semibold text-[var(--navy-dark)] outline-none"
+          className="flex-1 min-w-0 bg-transparent font-display text-base sm:text-sm font-semibold text-[var(--navy-dark)] outline-none"
           aria-label="Column title"
         />
         <span className="shrink-0 rounded-full bg-[var(--stroke)] px-2 py-0.5 text-[10px] font-semibold text-[var(--gray-text)]">

@@ -9,13 +9,11 @@ This project is building a Project Management App. Key features:
 - The cards on the Kanban board can be moved with drag and drop, and edited
 - There is an AI chat feature in a sidebar; the AI is able to create / edit / move one or more cards
 
-## Limitations
+## Current Feature Set
 
-For the MVP, there will only be a user sign in (hardcoded to 'user' and 'password') but the database will support multiple users for future.
-
-For the MVP, there will only be 1 Kanban board per signed in user.
-
-For the MVP, this will run locally (in a docker container)
+- Any user can sign up and log in (bcrypt-hashed passwords, JWT auth)
+- Each user can create, rename, switch between, and delete multiple named boards
+- Runs locally in a Docker container
 
 ## Technical Decisions
 
@@ -34,11 +32,20 @@ A working MVP of the frontend has been built and is already in frontend. This is
 
 ## Color Scheme
 
-- Accent Yellow: `#ecad0a` - accent lines, highlights
-- Blue Primary: `#209dd7` - links, key sections
-- Purple Secondary: `#753991` - submit buttons, important actions
-- Dark Navy: `#032147` - main headings
-- Gray Text: `#888888` - supporting text, labels
+All colours are CSS custom properties in `frontend/src/app/globals.css`. Light and dark values:
+
+| Variable | Light | Dark | Usage |
+|----------|-------|------|-------|
+| `--accent-yellow` | `#ecad0a` | `#f0b913` | Accent lines, highlights |
+| `--primary-blue` | `#209dd7` | `#3ab4e8` | Links, key sections |
+| `--secondary-purple` | `#753991` | `#9b60c8` | Submit buttons, important actions |
+| `--navy-dark` | `#032147` | `#dde6f0` | Main headings, body text |
+| `--gray-text` | `#888888` | `#7a90a8` | Supporting text, labels |
+| `--surface` | `#f7f8fb` | `#0e1825` | Page background |
+| `--surface-strong` | `#ffffff` | `#172233` | Cards, dropdowns, panels |
+| `--surface-header` | `rgba(255,255,255,0.85)` | `rgba(23,34,51,0.85)` | Frosted header / login card |
+
+Never use hardcoded `bg-white` in components — always use `bg-[var(--surface-strong)]` or `bg-[var(--surface-header)]`.
 
 ## Coding standards
 

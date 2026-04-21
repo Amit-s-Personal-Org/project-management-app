@@ -17,13 +17,25 @@ export const metadata: Metadata = {
   description: "A focused, single-board kanban workspace.",
 };
 
+// Runs before first paint — prevents flash of wrong theme
+const themeScript = `
+(function(){try{
+  var t=localStorage.getItem('pm-theme');
+  var d=t||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  document.documentElement.setAttribute('data-theme',d);
+}catch(e){}})();
+`.trim();
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className={`${displayFont.variable} ${bodyFont.variable}`}>
         {children}
       </body>

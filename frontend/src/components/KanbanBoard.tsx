@@ -12,6 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { Sparkles, LogOut, User } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
 import { AISidebar } from "@/components/AISidebar";
@@ -154,22 +155,21 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
       <div className="pointer-events-none absolute left-0 top-0 h-[420px] w-[420px] -translate-x-1/3 -translate-y-1/3 rounded-full bg-[radial-gradient(circle,_rgba(32,157,215,0.25)_0%,_rgba(32,157,215,0.05)_55%,_transparent_70%)]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full bg-[radial-gradient(circle,_rgba(117,57,145,0.18)_0%,_rgba(117,57,145,0.05)_55%,_transparent_75%)]" />
 
-      <main className="relative mx-auto flex min-h-screen max-w-[1500px] flex-col gap-6 px-6 pb-16 pt-8">
-        <header className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--stroke)] bg-white/80 px-6 py-4 shadow-[var(--shadow)] backdrop-blur">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
-                Kanban Studio
-              </p>
-              <h1 className="font-display text-xl font-semibold text-[var(--navy-dark)] truncate">
-                {board.columns.length > 0
-                  ? boards.find((b) => b.id === boardId)?.name ?? "My Board"
-                  : "My Board"}
-              </h1>
-            </div>
+      <main className="relative mx-auto flex min-h-[100dvh] max-w-[1500px] flex-col gap-4 sm:gap-6 px-3 sm:px-6 pb-16 pt-4 sm:pt-8">
+
+        {/* Header */}
+        <header className="flex items-center justify-between gap-2 sm:gap-4 rounded-2xl border border-[var(--stroke)] bg-[var(--surface-header)] px-4 py-3 sm:px-6 sm:py-4 shadow-[var(--shadow)] backdrop-blur">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
+              Kanban Studio
+            </p>
+            <h1 className="font-display text-base sm:text-xl font-semibold text-[var(--navy-dark)] truncate">
+              {boards.find((b) => b.id === boardId)?.name ?? "My Board"}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <ThemeToggle />
             <BoardSelector
               boards={boards}
               activeBoardId={boardId}
@@ -180,15 +180,15 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
               type="button"
               aria-label="Open AI assistant"
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center gap-2 rounded-xl border border-[var(--primary-blue)] bg-[var(--primary-blue)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-xl border border-[var(--primary-blue)] bg-[var(--primary-blue)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
             >
               <Sparkles size={14} />
-              <span className="hidden sm:inline">AI Assistant</span>
+              <span className="hidden sm:inline">AI</span>
             </button>
             {onLogout && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {username && (
-                  <div className="flex items-center gap-1.5 rounded-xl border border-[var(--stroke)] px-3 py-2 text-xs font-semibold text-[var(--gray-text)]">
+                  <div className="hidden sm:flex items-center gap-1.5 rounded-xl border border-[var(--stroke)] px-3 py-2 text-xs font-semibold text-[var(--gray-text)]">
                     <User size={13} />
                     <span className="hidden md:inline">{username}</span>
                   </div>
@@ -197,7 +197,7 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
                   type="button"
                   onClick={onLogout}
                   aria-label="Log out"
-                  className="flex items-center gap-2 rounded-xl border border-[var(--stroke)] px-3 py-2 text-xs font-semibold text-[var(--gray-text)] transition hover:border-[var(--navy-dark)] hover:text-[var(--navy-dark)]"
+                  className="flex items-center gap-1.5 rounded-xl border border-[var(--stroke)] px-3 py-2 text-xs font-semibold text-[var(--gray-text)] transition hover:border-[var(--navy-dark)] hover:text-[var(--navy-dark)]"
                 >
                   <LogOut size={13} />
                   <span className="hidden sm:inline">Log out</span>
@@ -207,37 +207,41 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
           </div>
         </header>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <section className="grid gap-4 lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2">
-            {board.columns.map((column) => (
-              <div
-                key={column.id}
-                className={flashedColumns.has(column.id) ? "column-flash" : ""}
-              >
-                <KanbanColumn
-                  column={column}
-                  cards={column.cardIds.map((id) => board.cards[id])}
-                  onRename={handleRenameColumn}
-                  onAddCard={handleAddCard}
-                  onDeleteCard={handleDeleteCard}
-                />
-              </div>
-            ))}
-          </section>
-          <DragOverlay>
-            {activeCard ? (
-              <div className="w-[240px]">
-                <KanbanCardPreview card={activeCard} />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+        {/* Board — horizontal scroll on mobile, grid on desktop */}
+        <div className="overflow-x-auto -mx-3 sm:-mx-6 px-3 sm:px-6 lg:overflow-x-visible lg:mx-0 lg:px-0">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <section className="flex gap-3 sm:gap-4 pb-4 lg:grid lg:grid-cols-5 lg:pb-0">
+              {board.columns.map((column) => (
+                <div
+                  key={column.id}
+                  className={`w-[78vw] max-w-[320px] shrink-0 lg:w-auto lg:max-w-none lg:shrink ${flashedColumns.has(column.id) ? "column-flash" : ""}`}
+                >
+                  <KanbanColumn
+                    column={column}
+                    cards={column.cardIds.map((id) => board.cards[id])}
+                    onRename={handleRenameColumn}
+                    onAddCard={handleAddCard}
+                    onDeleteCard={handleDeleteCard}
+                  />
+                </div>
+              ))}
+            </section>
+            <DragOverlay>
+              {activeCard ? (
+                <div className="w-[240px]">
+                  <KanbanCardPreview card={activeCard} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
       </main>
+
       <AISidebar
         isOpen={sidebarOpen}
         boardId={boardId}

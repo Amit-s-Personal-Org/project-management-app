@@ -14,6 +14,7 @@
 - [x] Part 10: AI sidebar UI
 - [x] Part 11: Multi-user signup/login
 - [x] Part 12: Multiple project boards
+- [x] Part 13: UI polish — icons, mobile layout, dark/light mode
 
 ---
 
@@ -348,3 +349,41 @@ Allow each user to create, name, switch between, and delete multiple boards.
 - A user can manage multiple named project boards from the UI
 - Board data is fully isolated per board and per user
 - All existing AI chat functionality works with the active board
+
+---
+
+## Part 13: UI Polish — Icons, Mobile Layout, Dark/Light Mode
+
+Improve the visual quality and usability of the frontend across devices and themes.
+
+### Steps
+- [x] Install `lucide-react`; replace all text-based action buttons with icon buttons
+  - Card delete: "Remove" text → `X` icon, hidden until card hover (desktop), always visible (mobile)
+  - AI Assistant button → `Sparkles` icon
+  - Log out button → `LogOut` icon
+  - Username badge → `User` icon
+  - Board selector chevron → `ChevronDown` icon (animates on open)
+  - Board delete in dropdown → `Trash2` icon
+  - AI sidebar close → `X` icon; send button → `Send` icon
+- [x] Compact the header into a single row; remove the redundant column-pill strip
+- [x] Mobile layout — horizontal-scroll Kanban columns
+  - Below `lg` (1024 px): `flex overflow-x-auto`, each column `78vw / max 320px` wide
+  - At `lg+`: reverts to `grid grid-cols-5`
+  - Negative-margin trick (`-mx-3 sm:-mx-6`) makes columns scroll flush to screen edges
+- [x] AI sidebar: `w-full` on mobile, `w-[360px]` on `sm+`
+- [x] Prevent iOS input auto-zoom: all `<input>` and `<textarea>` use `text-base sm:text-sm`
+- [x] Use `min-h-[100dvh]` throughout (replaces `min-h-screen`) to account for mobile browser chrome
+- [x] `BoardSelector` dropdown aligned `right-0` (never overflows viewport)
+- [x] Dark / light mode via CSS custom properties
+  - `[data-theme="dark"]` block in `globals.css` redefines all 9 colour variables
+  - New `--surface-header` variable for semi-transparent frosted header in both themes
+  - All hardcoded `bg-white` replaced with `bg-[var(--surface-strong)]` or `bg-[var(--surface-header)]`
+  - Anti-flash inline `<script>` in `layout.tsx` reads `localStorage` / `prefers-color-scheme` and sets `data-theme` before first paint
+  - `ThemeToggle` component: sun/moon icon button; persists preference to `localStorage`
+  - Toggle placed in board header and on the login page
+
+### Success Criteria
+- All buttons use icons; no text-only destructive actions remain
+- On a 375 px viewport the board is usable with horizontal swipe between columns
+- Dark mode looks correct with no flash of wrong theme on page load
+- All 18 unit tests pass; `npm run build` completes without errors

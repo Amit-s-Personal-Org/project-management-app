@@ -76,7 +76,7 @@ export const AISidebar = ({ isOpen, boardId, onClose, onBoardUpdate }: AISidebar
       <aside
         data-testid="ai-sidebar"
         aria-label="AI assistant sidebar"
-        className={`fixed right-0 top-0 z-30 flex h-screen w-[360px] flex-col border-l border-[var(--stroke)] bg-[var(--surface-strong)] shadow-[var(--shadow)] transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-30 flex h-[100dvh] w-full sm:w-[360px] flex-col border-l border-[var(--stroke)] bg-[var(--surface-strong)] shadow-[var(--shadow)] transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -143,7 +143,7 @@ export const AISidebar = ({ isOpen, boardId, onClose, onBoardUpdate }: AISidebar
           <div className="flex items-end gap-2">
             <textarea
               aria-label="Chat input"
-              className="flex-1 resize-none rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--navy-dark)] placeholder:text-[var(--gray-text)] focus:border-[var(--primary-blue)] focus:outline-none disabled:opacity-50"
+              className="flex-1 resize-none rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-3 py-2.5 text-base sm:text-sm text-[var(--navy-dark)] placeholder:text-[var(--gray-text)] focus:border-[var(--primary-blue)] focus:outline-none disabled:opacity-50"
               placeholder="Type a message…"
               rows={2}
               value={input}

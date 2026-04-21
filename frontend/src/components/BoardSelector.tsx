@@ -85,7 +85,7 @@ export const BoardSelector = ({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-[var(--stroke)] bg-white shadow-[var(--shadow)]">
+        <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-[var(--stroke)] bg-[var(--surface-strong)] shadow-[var(--shadow)]">
           <div className="max-h-60 overflow-y-auto py-2">
             {boards.map((board) => (
               <div
@@ -122,7 +122,7 @@ export const BoardSelector = ({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") { setCreating(false); setNewName(""); }}}
-                  className="flex-1 rounded-xl border border-[var(--stroke)] px-3 py-1.5 text-sm text-[var(--navy-dark)] outline-none focus:border-[var(--primary-blue)]"
+                  className="flex-1 rounded-xl border border-[var(--stroke)] px-3 py-1.5 text-base sm:text-sm text-[var(--navy-dark)] outline-none focus:border-[var(--primary-blue)]"
                 />
                 <button
                   type="button"

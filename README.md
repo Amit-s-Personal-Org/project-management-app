@@ -2,7 +2,7 @@
 
 # PM — Kanban Board with AI Sidebar
 
-A full-stack project management app featuring a drag-and-drop Kanban board and an AI chat sidebar that can create, move, and rename cards on your behalf.
+A full-stack project management app featuring a drag-and-drop Kanban board and an AI chat sidebar that can create, move, and rename cards on your behalf. Supports multiple boards per user, dark/light mode, and a mobile-optimised layout.
 
 ---
 
@@ -102,6 +102,7 @@ response: {
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 16 (static export), React 19, TypeScript, Tailwind CSS 4 |
+| Icons | lucide-react |
 | Drag & Drop | @dnd-kit/core, @dnd-kit/sortable |
 | Backend | FastAPI, Python 3.12, Uvicorn |
 | Auth | PyJWT (HS256), bcrypt |
@@ -246,18 +247,24 @@ pm/
     ├── next.config.ts      # output: "export" for static build
     ├── src/
     │   ├── app/
-    │   │   ├── layout.tsx  # Root layout
-    │   │   ├── page.tsx    # Login page
-    │   │   └── board/
-    │   │       └── page.tsx  # Main board page
+    │   │   ├── layout.tsx       # Root layout + anti-flash theme script
+    │   │   ├── page.tsx         # Auth gate; redirects to /login if unauthed
+    │   │   ├── globals.css      # CSS variables (light + dark themes)
+    │   │   └── login/
+    │   │       └── page.tsx     # Login / sign-up form
     │   ├── components/
-    │   │   ├── KanbanBoard.tsx
-    │   │   ├── AISidebar.tsx
-    │   │   ├── BoardSelector.tsx
-    │   │   └── (card/column subcomponents)
+    │   │   ├── KanbanBoard.tsx       # Board state, DnD, header
+    │   │   ├── KanbanColumn.tsx      # Droppable column
+    │   │   ├── KanbanCard.tsx        # Sortable card with hover-delete icon
+    │   │   ├── KanbanCardPreview.tsx # Drag overlay ghost
+    │   │   ├── NewCardForm.tsx       # Inline add-card form
+    │   │   ├── AISidebar.tsx         # Fixed right-side chat panel
+    │   │   ├── BoardSelector.tsx     # Header dropdown (switch/create/delete)
+    │   │   └── ThemeToggle.tsx       # Dark/light mode button
     │   └── lib/
     │       ├── api.ts      # Typed fetch wrapper for all API calls
-    │       └── auth.ts     # Token read/write helpers (localStorage)
+    │       ├── auth.ts     # Token read/write helpers (localStorage)
+    │       └── kanban.ts   # Data types, moveCard(), createId()
     └── tests/
         └── (Playwright E2E specs)
 ```
