@@ -3,12 +3,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 import db
 from ai import call_ai, chat_with_board
 from auth import create_token, get_current_user, hash_password, verify_password
-from models import AIResponse, BoardData, BoardInfo
+from models import AIResponse, AuthRequest, BoardData, BoardInfo, ChatRequest, CreateBoardRequest
 
 
 @asynccontextmanager
@@ -23,10 +22,6 @@ app = FastAPI(lifespan=lifespan)
 # ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
-
-class AuthRequest(BaseModel):
-    username: str
-    password: str
 
 
 @app.post("/api/auth/signup")
@@ -82,10 +77,6 @@ async def ai_ping():
 # Boards
 # ---------------------------------------------------------------------------
 
-class CreateBoardRequest(BaseModel):
-    name: str
-
-
 @app.get("/api/boards", response_model=list[BoardInfo])
 def list_boards(username: str = Depends(get_current_user)):
     return db.get_boards_for_user(username)
@@ -122,12 +113,6 @@ def put_board(board_id: int, board: BoardData, username: str = Depends(get_curre
 # ---------------------------------------------------------------------------
 # AI chat
 # ---------------------------------------------------------------------------
-
-class ChatRequest(BaseModel):
-    message: str
-    board_id: int
-    history: list[dict] = []
-
 
 @app.post("/api/chat", response_model=AIResponse)
 async def chat(req: ChatRequest, username: str = Depends(get_current_user)):

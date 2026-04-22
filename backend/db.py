@@ -45,18 +45,17 @@ _SEED_COLUMNS = [
 
 
 def get_connection() -> sqlite3.Connection:
-    path = DATABASE_PATH
-    if path != ":memory:":
-        db_dir = os.path.dirname(path)
-        if db_dir:
-            os.makedirs(db_dir, exist_ok=True)
-    conn = sqlite3.connect(path)
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
 def init_db() -> None:
+    if DATABASE_PATH != ":memory:":
+        db_dir = os.path.dirname(DATABASE_PATH)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
     with get_connection() as conn:
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS users (
@@ -84,12 +83,10 @@ def init_db() -> None:
                 position  INTEGER NOT NULL
             );
         """)
-        # Migrate: add name column if upgrading from older schema
         try:
             conn.execute("ALTER TABLE boards ADD COLUMN name TEXT NOT NULL DEFAULT 'My Board'")
         except sqlite3.OperationalError:
-            pass  # column already exists
-        # Migrate: add ext_id columns to preserve client-generated string IDs
+            pass
         try:
             conn.execute("ALTER TABLE columns ADD COLUMN ext_id TEXT")
             conn.execute("UPDATE columns SET ext_id = 'col-' || id WHERE ext_id IS NULL")
@@ -186,12 +183,7 @@ def create_board_for_user(username: str, name: str) -> BoardInfo:
 def delete_board(board_id: int, username: str) -> bool:
     """Delete board if it belongs to the user. Returns True on success."""
     with get_connection() as conn:
-        row = conn.execute(
-            """SELECT b.id FROM boards b JOIN users u ON b.user_id = u.id
-               WHERE b.id = ? AND u.username = ?""",
-            (board_id, username),
-        ).fetchone()
-        if not row:
+        if not _assert_board_ownership(conn, board_id, username):
             return False
         conn.execute("DELETE FROM boards WHERE id = ?", (board_id,))
         return True
@@ -203,22 +195,29 @@ def _read_board(conn: sqlite3.Connection, board_id: int) -> BoardData:
         (board_id,),
     ).fetchall()
 
-    columns: list[Column] = []
+    card_ids_by_col: dict[int, list[str]] = {col["id"]: [] for col in cols}
     cards: dict[str, Card] = {}
 
-    for col in cols:
-        col_id_str = col["ext_id"] or f"col-{col['id']}"
-        col_cards = conn.execute(
-            "SELECT id, ext_id, title, details FROM cards WHERE column_id = ? ORDER BY position",
-            (col["id"],),
-        ).fetchall()
-        card_ids = []
-        for card in col_cards:
-            cid = card["ext_id"] or f"card-{card['id']}"
-            card_ids.append(cid)
-            cards[cid] = Card(id=cid, title=card["title"], details=card["details"])
-        columns.append(Column(id=col_id_str, title=col["title"], cardIds=card_ids))
+    for card in conn.execute(
+        """SELECT c.id, c.ext_id, c.title, c.details, c.column_id
+           FROM cards c
+           JOIN columns col ON c.column_id = col.id
+           WHERE col.board_id = ?
+           ORDER BY col.position, c.position""",
+        (board_id,),
+    ).fetchall():
+        cid = card["ext_id"] or f"card-{card['id']}"
+        cards[cid] = Card(id=cid, title=card["title"], details=card["details"])
+        card_ids_by_col[card["column_id"]].append(cid)
 
+    columns = [
+        Column(
+            id=col["ext_id"] or f"col-{col['id']}",
+            title=col["title"],
+            cardIds=card_ids_by_col[col["id"]],
+        )
+        for col in cols
+    ]
     return BoardData(columns=columns, cards=cards)
 
 

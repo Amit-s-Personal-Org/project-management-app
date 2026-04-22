@@ -42,9 +42,7 @@ test("login with wrong credentials shows error", async ({ page }) => {
 
 test("loads the kanban board after login", async ({ page }) => {
   await loginAs(page);
-  await expect(
-    page.getByRole("heading", { name: "Kanban Studio" })
-  ).toBeVisible();
+  await expect(page.getByText("Kanban Studio").first()).toBeVisible();
   await expect(page.locator('[data-testid^="column-"]')).toHaveCount(5);
 });
 

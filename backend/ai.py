@@ -4,33 +4,31 @@ import re
 
 import httpx
 
+from models import AIResponse, BoardData
+
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "openrouter/free"
+_API_KEY = os.getenv("OPENROUTER_API_KEY")
+_http_client = httpx.AsyncClient(timeout=45.0)
 
 
 async def call_ai(messages: list[dict]) -> str:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
+    if not _API_KEY:
         raise ValueError("OPENROUTER_API_KEY is not set")
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            OPENROUTER_URL,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "HTTP-Referer": "http://localhost:8000",
-                "X-Title": "Project Management App",
-            },
-            json={"model": MODEL, "messages": messages},
-            timeout=45.0,
-        )
-        response.raise_for_status()
-
+    response = await _http_client.post(
+        OPENROUTER_URL,
+        headers={
+            "Authorization": f"Bearer {_API_KEY}",
+            "HTTP-Referer": "http://localhost:8000",
+            "X-Title": "Project Management App",
+        },
+        json={"model": MODEL, "messages": messages},
+    )
+    response.raise_for_status()
     return response.json()["choices"][0]["message"]["content"]
 
 
-async def chat_with_board(board: "BoardData", history: list[dict], message: str) -> "AIResponse":
-    from models import AIResponse, BoardData  # noqa: F401 (type reference)
+async def chat_with_board(board: BoardData, history: list[dict], message: str) -> AIResponse:
 
     board_json = json.dumps(board.model_dump(), indent=2)
 

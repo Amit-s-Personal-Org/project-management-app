@@ -29,7 +29,7 @@ export const AISidebar = ({ isOpen, boardId, onClose, onBoardUpdate }: AISidebar
     if (typeof bottomRef.current?.scrollIntoView === "function") {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, loading]);
+  }, [messages]);
 
   const handleSend = async () => {
     const text = input.trim();

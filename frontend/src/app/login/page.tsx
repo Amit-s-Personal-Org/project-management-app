@@ -16,6 +16,12 @@ export default function LoginPage() {
     const form = e.currentTarget;
     const username = (form.elements.namedItem("username") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const confirm = (form.elements.namedItem("confirm") as HTMLInputElement | null)?.value;
+
+    if (!isLogin && password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -34,6 +40,15 @@ export default function LoginPage() {
   };
 
   const isLogin = mode === "login";
+
+  const handleToggleMode = () => {
+    setMode(isLogin ? "signup" : "login");
+    setError("");
+  };
+
+  const buttonLabel = loading
+    ? isLogin ? "Signing in..." : "Creating account..."
+    : isLogin ? "Sign in" : "Create account";
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center px-4 py-8">
@@ -89,6 +104,25 @@ export default function LoginPage() {
             />
           </div>
 
+          {!isLogin && (
+            <div>
+              <label
+                htmlFor="confirm"
+                className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)]"
+              >
+                Confirm Password
+              </label>
+              <input
+                id="confirm"
+                name="confirm"
+                type="password"
+                required
+                autoComplete="new-password"
+                className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface-strong)] px-3 py-2.5 text-base sm:text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+              />
+            </div>
+          )}
+
           {error && (
             <p className="text-xs font-semibold text-red-500">{error}</p>
           )}
@@ -98,7 +132,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-full bg-[var(--secondary-purple)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110 disabled:opacity-60"
           >
-            {loading ? (isLogin ? "Signing in..." : "Creating account...") : (isLogin ? "Sign in" : "Create account")}
+            {buttonLabel}
           </button>
         </form>
 
@@ -106,7 +140,7 @@ export default function LoginPage() {
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             type="button"
-            onClick={() => { setMode(isLogin ? "signup" : "login"); setError(""); }}
+            onClick={handleToggleMode}
             className="font-semibold text-[var(--primary-blue)] hover:underline"
           >
             {isLogin ? "Sign up" : "Sign in"}

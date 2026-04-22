@@ -36,7 +36,7 @@ export const KanbanCard = ({ card, onDelete }: KanbanCardProps) => {
           <h4 className="font-display text-sm font-semibold leading-5 text-[var(--navy-dark)]">
             {card.title}
           </h4>
-          {card.details && card.details !== "No details yet." && (
+          {card.details && (
             <p className="mt-1.5 text-xs leading-5 text-[var(--gray-text)]">
               {card.details}
             </p>

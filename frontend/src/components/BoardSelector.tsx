@@ -38,6 +38,19 @@ export const BoardSelector = ({
 
   const activeBoard = boards.find((b) => b.id === activeBoardId);
 
+  const handleSelect = (board: BoardInfo) => {
+    onSwitch(board);
+    setOpen(false);
+  };
+
+  const handleNewBoardKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleCreate();
+    if (e.key === "Escape") {
+      setCreating(false);
+      setNewName("");
+    }
+  };
+
   const handleCreate = async () => {
     const name = newName.trim() || "New Board";
     setLoading(true);
@@ -95,7 +108,7 @@ export const BoardSelector = ({
                     ? "bg-[var(--surface)] text-[var(--primary-blue)]"
                     : "text-[var(--navy-dark)] hover:bg-[var(--surface)]"
                 }`}
-                onClick={() => { onSwitch(board); setOpen(false); }}
+                onClick={() => handleSelect(board)}
               >
                 <span className="truncate">{board.name}</span>
                 {boards.length > 1 && (
@@ -121,7 +134,7 @@ export const BoardSelector = ({
                   placeholder="Board name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") { setCreating(false); setNewName(""); }}}
+                  onKeyDown={handleNewBoardKeyDown}
                   className="flex-1 rounded-xl border border-[var(--stroke)] px-3 py-1.5 text-base sm:text-sm text-[var(--navy-dark)] outline-none focus:border-[var(--primary-blue)]"
                 />
                 <button

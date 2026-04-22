@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { getMe, logout } from "@/lib/auth";
 import { getBoards, type BoardInfo } from "@/lib/api";
 import { KanbanBoard } from "@/components/KanbanBoard";
-import { BoardSelector } from "@/components/BoardSelector";
 
 export default function Home() {
   const router = useRouter();

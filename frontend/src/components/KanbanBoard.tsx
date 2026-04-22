@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -37,6 +37,11 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
   const [flashedColumns, setFlashedColumns] = useState<Set<string>>(new Set());
   const boardRef = useRef<BoardData | null>(null);
   const renameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const boardName = useMemo(
+    () => boards.find((b) => b.id === boardId)?.name ?? "My Board",
+    [boards, boardId]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -96,7 +101,7 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
       ...board,
       cards: {
         ...board.cards,
-        [id]: { id, title, details: details || "No details yet." },
+        [id]: { id, title, details },
       },
       columns: board.columns.map((c) =>
         c.id === columnId ? { ...c, cardIds: [...c.cardIds, id] } : c
@@ -164,7 +169,7 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
               Kanban Studio
             </p>
             <h1 className="font-display text-base sm:text-xl font-semibold text-[var(--navy-dark)] truncate">
-              {boards.find((b) => b.id === boardId)?.name ?? "My Board"}
+              {boardName}
             </h1>
           </div>
 
@@ -217,18 +222,15 @@ export const KanbanBoard = ({ boardId, boards, username, onBoardsChange, onSwitc
           >
             <section className="flex gap-3 sm:gap-4 pb-4 lg:grid lg:grid-cols-5 lg:pb-0">
               {board.columns.map((column) => (
-                <div
+                <KanbanColumn
                   key={column.id}
-                  className={`w-[78vw] max-w-[320px] shrink-0 lg:w-auto lg:max-w-none lg:shrink ${flashedColumns.has(column.id) ? "column-flash" : ""}`}
-                >
-                  <KanbanColumn
-                    column={column}
-                    cards={column.cardIds.map((id) => board.cards[id])}
-                    onRename={handleRenameColumn}
-                    onAddCard={handleAddCard}
-                    onDeleteCard={handleDeleteCard}
-                  />
-                </div>
+                  column={column}
+                  cards={column.cardIds.map((id) => board.cards[id])}
+                  onRename={handleRenameColumn}
+                  onAddCard={handleAddCard}
+                  onDeleteCard={handleDeleteCard}
+                  className={`w-[78vw] max-w-[320px] shrink-0 lg:w-auto lg:max-w-none lg:shrink${flashedColumns.has(column.id) ? " column-flash" : ""}`}
+                />
               ))}
             </section>
             <DragOverlay>

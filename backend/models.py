@@ -1,6 +1,21 @@
 from pydantic import BaseModel, model_validator
 
 
+class AuthRequest(BaseModel):
+    username: str
+    password: str
+
+
+class CreateBoardRequest(BaseModel):
+    name: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    board_id: int
+    history: list[dict] = []
+
+
 class Card(BaseModel):
     id: str
     title: str
